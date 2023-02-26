@@ -5,17 +5,51 @@ import Typography from '@mui/material/Typography';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import LoginIcon from '@mui/icons-material/Login';
+import { useSession } from "@inrupt/solid-ui-react";
 import Link from 'next/link'
 
 export default function HomeToolbar({ color, title }) {
 
+    const { session, sessionRequestInProgress, logout } = useSession();
+
+    let loggedIn = session.info.isLoggedIn;
+
+    let rightSide;
+
+    if (loggedIn) {
+        rightSide = (
+            <div>
+
+                <Link href="/account">
+                    <IconButton
+                        size="large"
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        color="inherit"
+                    >
+                        <AccountCircle />
+                    </IconButton>
+                </Link>
+            </div>)
+    } else {
+        rightSide = (
+            <Link href="/login">
+                <IconButton
+                    size="large"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    color="inherit"
+                >
+                    <LoginIcon />
+                </IconButton>
+            </Link>)
+    }
+
     return (
         <div>
-            <Head>
-                <title>Home Page</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
             <AppBar position="static" color={color}>
                 <Toolbar>
                     <IconButton
@@ -30,18 +64,7 @@ export default function HomeToolbar({ color, title }) {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         {title || 'Solid Health'}
                     </Typography>
-                    <Typography></Typography>
-                    <Link href="/login">
-                        <IconButton
-                            size="large"
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            color="inherit"
-                        >
-                            <AccountCircle />
-                        </IconButton>
-                    </Link>
+                    {rightSide}
                 </Toolbar>
             </AppBar>
         </div>

@@ -4,3 +4,4 @@ export default async function handler(req, res) {
     console.log('RESPONSE' + JSON.stringify(user))
 
 }
+

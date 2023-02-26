@@ -45,11 +45,11 @@ export default function LoginPage() {
                         <CardHeader title="Connect Your Pod">
                         </CardHeader>
                         <CardContent>
-                            <Typography >Please click the button below in order to connect your Solid Pod. </Typography>
+                            <Typography >Please click the button below in order to connect your Solid Pod.</Typography>
                         </CardContent>
                         <CardActions>
                             <LoginButton
-                                oidcIssuer="https://inrupt.net"
+                                oidcIssuer="https://login.inrupt.com/"
                                 onError={loginError}
                                 redirectUrl="http://localhost:3000/home"
                             >
