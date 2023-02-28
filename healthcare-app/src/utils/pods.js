@@ -7,8 +7,12 @@ import {
     getThing,
     saveSolidDatasetAt,
     createSolidDataset,
-    createContainerAt
+    createContainerAt,
+    buildThing,
+    createThing,
+    setThing
 } from "@inrupt/solid-client";
+import { PROFILE } from "./predicates";
 
 
 export async function getPodUrls(webId, session) {
@@ -16,30 +20,12 @@ export async function getPodUrls(webId, session) {
     return pods
 }
 
-
 export async function checkIfDatasetExists(session, datasetUrl) {
     try {
         const dataset = await getSolidDataset(datasetUrl, { fetch: session.fetch });
         return true
     }
     catch (ex) {
-        if (ex.message.includes("Fetching the Resource at [" + datasetUrl + "] failed: [404]"))  //Dataset does not exist
-        {
-            return false
-        }
-        else if (ex.message.includes("Fetching the Resource at [" + datasetUrl + "] failed: [403]"))  //Dataset may exist but user not authorized
-        {
-            return false
-        }
-    }
-}
-
-export async function getAllFilesFromDataset(session, datasetUrl) {
-    try {
-        const dataset = await getSolidDataset(datasetUrl, { fetch: session.fetch });
-        let filesInDataset = await getThingAll(dataset, { fetch: session.fetch })
-        return filesInDataset
-    } catch (ex) {
         if (ex.message.includes("Fetching the Resource at [" + datasetUrl + "] failed: [404]"))  //Dataset does not exist
         {
             return false
@@ -61,6 +47,12 @@ export async function getProfile(session) {
     } catch (e) {
         console.log(e)
     }
+}
+
+export async function getProfileData(containerUrl, session) {
+    const dataset = await getSolidDataset(`${containerUrl}profile.ttl`, { fetch: session.fetch });
+
+    return await getThing(dataset, `${containerUrl}profile.ttl#profileData`)
 }
 
 export async function getOrCreateContainer(containerUri, session) {
@@ -94,13 +86,13 @@ async function createTurtleFiles(containerUri, session) {
         }
     );
 
-    await saveSolidDatasetAt(
+    const profileDataset = await saveSolidDatasetAt(
         profileUrl,
         createSolidDataset(),
         {
             fetch: session.fetch,
         }
-    );
+    )
 
     await saveSolidDatasetAt(
         appointmentsUrl,
@@ -117,4 +109,25 @@ async function createTurtleFiles(containerUri, session) {
             fetch: session.fetch,
         }
     );
+
+    await createProfileData(profileDataset, session, profileUrl)
+
+    console.log("TURLTE FILES ALL CREATED!")
+}
+
+export async function createProfileData(profileDataset, session, url) {
+
+    const date = new Date().toUTCString()
+    const profileData = buildThing(createThing({ name: 'profileData' }))
+        .addStringNoLocale(PROFILE.DATE_CREATED, date)
+        .addStringNoLocale(PROFILE.ADDRESS, '')
+        .addStringNoLocale(PROFILE.GIVEN_NAME, '')
+        .addStringNoLocale(PROFILE.FAMILY_NAME, '')
+        .addStringNoLocale(PROFILE.EMAIL, '')
+        .addStringNoLocale(PROFILE.TELEPHONE, '')
+        .build()
+
+    const dataset = setThing(profileDataset, profileData)
+
+    await saveSolidDatasetAt(url, dataset, { fetch: session.fetch })
 }
