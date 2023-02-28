@@ -24,6 +24,10 @@ export default function LoginPage() {
         console.log('LOGIN ERROR' + error)
     }
 
+    const authOptions = {
+        clientName: "Solid Health",
+    };
+
     return (
         <ThemeProvider theme={theme}>
             <Head>
@@ -51,7 +55,8 @@ export default function LoginPage() {
                             <LoginButton
                                 oidcIssuer="https://login.inrupt.com/"
                                 onError={loginError}
-                                redirectUrl="http://localhost:3000/home"
+                                authOptions={authOptions}
+                                redirectUrl="http://localhost:3000/profile"
                             >
                                 <Button>Log In With Solid</Button>
                             </LoginButton>

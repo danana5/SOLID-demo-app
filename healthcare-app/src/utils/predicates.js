@@ -1,0 +1,1 @@
+export const STORAGE_PREDICATE = "http://www.w3.org/ns/pim/space#storage";

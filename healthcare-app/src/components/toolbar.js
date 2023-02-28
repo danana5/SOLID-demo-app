@@ -21,7 +21,7 @@ export default function HomeToolbar({ color, title }) {
         rightSide = (
             <div>
 
-                <Link href="/account">
+                <Link href="/profile">
                     <IconButton
                         size="large"
                         aria-label="account of current user"
