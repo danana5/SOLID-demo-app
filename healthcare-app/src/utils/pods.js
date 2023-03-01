@@ -10,9 +10,11 @@ import {
     createContainerAt,
     buildThing,
     createThing,
-    setThing
+    setThing,
+    setBoolean,
+    getUrlAll
 } from "@inrupt/solid-client";
-import { PROFILE } from "./predicates";
+import { PROFILE, STORAGE_PREDICATE } from "./predicates";
 
 
 export async function getPodUrls(webId, session) {
@@ -40,12 +42,11 @@ export async function checkIfDatasetExists(session, datasetUrl) {
 export async function getProfile(session) {
     try {
         const dataset = await getSolidDataset(session.info.webId)
-
         const profileThing = getThing(dataset, session.info.webId)
 
         return profileThing
     } catch (e) {
-        console.log(e)
+        console.log("ERROR")
     }
 }
 
@@ -125,6 +126,7 @@ export async function createProfileData(profileDataset, session, url) {
         .addStringNoLocale(PROFILE.FAMILY_NAME, '')
         .addStringNoLocale(PROFILE.EMAIL, '')
         .addStringNoLocale(PROFILE.TELEPHONE, '')
+        .addBoolean(PROFILE.DOCTOR, false)
         .build()
 
     const dataset = await setThing(profileDataset, profileData)
@@ -134,8 +136,6 @@ export async function createProfileData(profileDataset, session, url) {
 
 export async function updateProfileData(profile, containerUrl, session) {
     try {
-        console.log("here")
-        console.log(profile)
         const dataset = await getSolidDataset(`${containerUrl}profile.ttl`, { fetch: session.fetch });
         const profileData = buildThing(createThing({ name: 'profileData' }))
             .addStringNoLocale(PROFILE.DATE_CREATED, profile.dateCreated)
@@ -144,6 +144,7 @@ export async function updateProfileData(profile, containerUrl, session) {
             .addStringNoLocale(PROFILE.FAMILY_NAME, profile.familyName)
             .addStringNoLocale(PROFILE.EMAIL, profile.email)
             .addStringNoLocale(PROFILE.TELEPHONE, profile.telephone)
+            .addBoolean(PROFILE.DOCTOR, profile.doctor)
             .build()
 
         const thing = await setThing(dataset, profileData)
@@ -151,5 +152,43 @@ export async function updateProfileData(profile, containerUrl, session) {
         await saveSolidDatasetAt(`${containerUrl}profile.ttl`, thing, { fetch: session.fetch })
     } catch (e) {
         console.log(e)
+    }
+}
+
+export async function getProfilePhoto(containerUrl, session) {
+    try {
+        const dataset = await getSolidDataset(`${containerUrl}`, { fetch: session.fetch });
+
+        const things = getThingAll(dataset, { fetch: session.fetch })
+
+        console.log(things)
+    }
+    catch (e) {
+        console.log(e)
+    }
+}
+
+export async function switchToGPAccount(session) {
+
+    if (session.info.isLoggedIn) {
+        const profileThing = await getProfile(session)
+
+        const podsUrls = getUrlAll(
+            profileThing,
+            STORAGE_PREDICATE
+        );
+        const pod = podsUrls[0]
+        const containerUri = `${pod}Solid-Health/`
+
+        const dataset = await getSolidDataset(`${containerUri}profile.ttl`, { fetch: session.fetch });
+
+        let thing = await getThing(dataset, `${containerUri}profile.ttl#profileData`)
+        console.log(thing)
+
+        thing = await setBoolean(thing, PROFILE.DOCTOR, true)
+
+        thing = await setThing(dataset, thing)
+
+        await saveSolidDatasetAt(`${containerUri}profile.ttl`, thing, { fetch: session.fetch })
     }
 }

@@ -1,12 +1,15 @@
 import HomeToolbar from "@/components/toolbar";
 import { useSession, CombinedDataProvider, Text } from "@inrupt/solid-ui-react";
 import { Typography, Container, Card, TextField, Button, CardActions, CardContent, CardHeader, Avatar } from "@mui/material";
-import { getProfile, getOrCreateContainer, getProfileData, updateProfileData } from "@/utils/pods"
+import { getProfile, getOrCreateContainer, getProfileData, updateProfileData, getProfilePhoto } from "@/utils/pods"
 import { useEffect, useState } from "react";
-import { getSolidDataset, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
+import { getSolidDataset, getThing, getUrlAll, getStringNoLocale, getBoolean } from "@inrupt/solid-client";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import LogoutIcon from '@mui/icons-material/Logout';
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { STORAGE_PREDICATE, PROFILE } from "@/utils/predicates";
 
 
@@ -20,7 +23,10 @@ export default function ProfilePage() {
     const [pods, setPods] = useState()
     const [temp, setTemp] = useState()
     const [loading, setLoading] = useState()
+    //const [photo, setPhoto] = useState()
     let profilePage
+    let adminLogIn
+    const router = useRouter()
 
 
 
@@ -36,6 +42,7 @@ export default function ProfilePage() {
             res.email = await getStringNoLocale(profileData, PROFILE.EMAIL)
             res.telephone = await getStringNoLocale(profileData, PROFILE.TELEPHONE)
             res.address = await getStringNoLocale(profileData, PROFILE.ADDRESS)
+            res.doctor = await getBoolean(profileData, PROFILE.DOCTOR)
             setProfile(res)
         }
 
@@ -49,9 +56,7 @@ export default function ProfilePage() {
             setPods(podsUrls)
             const pod = podsUrls[0]
             const containerUri = `${pod}Solid-Health/`
-            setContainerUrl(`${pod}Solid-Health/`)
-            console.log(containerUrl)
-
+            setContainerUrl(containerUri)
             setContainer(await getOrCreateContainer(containerUri, session))
             await assignDataToProfile(await getProfileData(containerUri, session))
         })();
@@ -85,23 +90,30 @@ export default function ProfilePage() {
             ...temp,
             [evt.target.name]: value
         });
+    }
 
-        console.log(temp)
+    function handleLogout() {
+        session.logout
+        router.push('/login')
     }
 
     if (!edit) {
         profilePage = (
             <div>
-                <CardHeader title="Your Profile"></CardHeader>
+                <CardHeader titleTypographyProps={{ variant: "subtitle1", color: "text.secondary" }} title={session.info.webId} avatar={
+                    <Avatar variant="rounded" sx={{ width: 80, height: 80, position: "center", }} >{getIntials()}</Avatar>}>
+                </CardHeader>
                 <CardContent>
-                    <Avatar variant="rounded" sx={{ width: 80, height: 80, position: "center", mb: 3 }} >{getIntials()}</Avatar>
-                    <Typography>Name: {profile.givenName + ' ' + profile.familyName}</Typography>
-                    <Typography>Address: {profile.address}</Typography>
-                    <Typography>Contact Number: {profile.telephone}</Typography>
-                    <Typography>Email Address: {profile.email}</Typography>
-                    <Typography>You've Been a Member Since: {new Date(profile.dateCreated).toDateString()}</Typography>
+                    <Typography><strong>Name: </strong>{profile.givenName + ' ' + profile.familyName}</Typography>
+                    <Typography><strong>Address: </strong> {profile.address}</Typography>
+                    <Typography><strong>Contact Number: </strong> {profile.telephone}</Typography>
+                    <Typography><strong>Email Address: </strong> {profile.email}</Typography>
+                    <Typography><strong>You've Been a Member Since: </strong>{new Date(profile.dateCreated).toDateString()}</Typography>
                 </CardContent>
-                <CardActions><Button onClick={handleEdit} startIcon={<EditIcon />} >Edit</Button></CardActions>
+                <CardActions>
+                    <Button onClick={handleEdit} startIcon={<EditIcon />} >Edit</Button>
+                    <Button onClick={handleLogout} startIcon={<LogoutIcon />}>Logout</Button>
+                </CardActions>
             </div>
 
         )
@@ -126,11 +138,19 @@ export default function ProfilePage() {
         )
     }
 
+    if (!profile.doctor) {
+        adminLogIn = (
+            <Link href="/gp">
+                <Typography color="text.secondary" variant="subtitle2" sx={{ mt: 2, maxWidth: 400, mr: 50, ml: 52 }}>Are You a GP? Click here to Register as a GP</Typography>
+            </Link>)
+    }
+
     return (
         <div>
-            <HomeToolbar></HomeToolbar>
+            <HomeToolbar doctor={profile.doctor}></HomeToolbar>
             <Container>
-                <Card sx={{ mt: 5 }} variant="outlined">{profilePage}</Card>
+                <Card sx={{ mt: 5, maxWidth: 400, mr: 50, ml: 50 }} variant="outlined">{profilePage}</Card>
+                {adminLogIn}
             </Container>
         </div >
     )

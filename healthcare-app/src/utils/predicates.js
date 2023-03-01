@@ -7,5 +7,6 @@ export const PROFILE = {
     GIVEN_NAME: "https://schema.org/givenName",
     FAMILY_NAME: "https://schema.org/familyName",
     EMAIL: "https://schema.org/email",
-    TELEPHONE: "https://schema.org/telephone"
+    TELEPHONE: "https://schema.org/telephone",
+    DOCTOR: "https://schema.org/accountablePerson"
 }
