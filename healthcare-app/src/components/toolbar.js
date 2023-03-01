@@ -10,16 +10,19 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import LoginIcon from '@mui/icons-material/Login';
 import { useSession } from "@inrupt/solid-ui-react";
 import Link from 'next/link'
+import { useEffect, useState } from 'react';
+import { isAccountADoctor } from '@/utils/pods';
 
-export default function HomeToolbar({ doctor }) {
+export default function HomeToolbar({ }) {
 
-    const { session, sessionRequestInProgress, logout } = useSession();
+    const { session } = useSession();
 
-    let loggedIn = session.info.isLoggedIn;
 
     let rightSide;
 
-    if (loggedIn) {
+    const [color, setColor] = useState('')
+
+    if (session.info.isLoggedIn) {
         rightSide = (
             <div>
                 <Box>
@@ -51,17 +54,26 @@ export default function HomeToolbar({ doctor }) {
             </Link>)
     }
 
-    function getColor() {
-        if (doctor) {
-            return 'secondary'
-        } else {
-            return 'primary'
+    useEffect(() => {
+
+        async function isGP() {
+            let gp = await isAccountADoctor(session)
+
+            if (gp) {
+                setColor("secondary")
+            }
+            else {
+                setColor("primary")
+            }
         }
-    }
+
+        isGP()
+    }, [])
+
 
     return (
         <div>
-            <AppBar position="static" color={getColor()}>
+            <AppBar position="static" color={color}>
                 <Toolbar>
                     <MonitorHeartIcon />
                     <Typography
@@ -81,12 +93,12 @@ export default function HomeToolbar({ doctor }) {
                     <Button
                         sx={{ my: 2, color: 'white', display: 'block', display: { xs: 'none', md: 'flex' }, maxWidth: 150 }}
                     >
-                        Appointments
+                        <Link href="/appointments">Appointments</Link>
                     </Button>
                     <Button
                         sx={{ my: 2, color: 'white', display: 'block', display: { xs: 'none', md: 'flex' }, maxWidth: 150, mr: 5 }}
                     >
-                        Prescriptions
+                        <Link href="/prescriptions">Prescriptions</Link>
                     </Button>
                     {rightSide}
                 </Toolbar>

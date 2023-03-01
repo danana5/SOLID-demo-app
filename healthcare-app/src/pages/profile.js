@@ -1,9 +1,9 @@
 import HomeToolbar from "@/components/toolbar";
-import { useSession, CombinedDataProvider, Text } from "@inrupt/solid-ui-react";
+import { useSession } from "@inrupt/solid-ui-react";
 import { Typography, Container, Card, TextField, Button, CardActions, CardContent, CardHeader, Avatar } from "@mui/material";
 import { getProfile, getOrCreateContainer, getProfileData, updateProfileData, getProfilePhoto } from "@/utils/pods"
 import { useEffect, useState } from "react";
-import { getSolidDataset, getThing, getUrlAll, getStringNoLocale, getBoolean } from "@inrupt/solid-client";
+import { getUrlAll, getStringNoLocale, getBoolean } from "@inrupt/solid-client";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -36,13 +36,13 @@ export default function ProfilePage() {
         async function assignDataToProfile(profileData) {
             const res = {}
 
-            res.givenName = await getStringNoLocale(profileData, PROFILE.GIVEN_NAME)
-            res.familyName = await getStringNoLocale(profileData, PROFILE.FAMILY_NAME)
-            res.dateCreated = await getStringNoLocale(profileData, PROFILE.DATE_CREATED)
-            res.email = await getStringNoLocale(profileData, PROFILE.EMAIL)
-            res.telephone = await getStringNoLocale(profileData, PROFILE.TELEPHONE)
-            res.address = await getStringNoLocale(profileData, PROFILE.ADDRESS)
-            res.doctor = await getBoolean(profileData, PROFILE.DOCTOR)
+            res.givenName = getStringNoLocale(profileData, PROFILE.GIVEN_NAME)
+            res.familyName = getStringNoLocale(profileData, PROFILE.FAMILY_NAME)
+            res.dateCreated = getStringNoLocale(profileData, PROFILE.DATE_CREATED)
+            res.email = getStringNoLocale(profileData, PROFILE.EMAIL)
+            res.telephone = getStringNoLocale(profileData, PROFILE.TELEPHONE)
+            res.address = getStringNoLocale(profileData, PROFILE.ADDRESS)
+            res.doctor = getBoolean(profileData, PROFILE.DOCTOR)
             setProfile(res)
         }
 

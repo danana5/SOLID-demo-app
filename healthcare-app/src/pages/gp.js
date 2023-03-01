@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link'
 import { switchToGPAccount } from '@/utils/pods';
 import { useSession } from "@inrupt/solid-ui-react";
-import { useEffect } from "react";
+
 
 
 export default function gpApplicationPage() {

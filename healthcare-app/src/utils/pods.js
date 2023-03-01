@@ -12,7 +12,8 @@ import {
     createThing,
     setThing,
     setBoolean,
-    getUrlAll
+    getUrlAll,
+    getBoolean
 } from "@inrupt/solid-client";
 import { PROFILE, STORAGE_PREDICATE } from "./predicates";
 
@@ -24,7 +25,7 @@ export async function getPodUrls(webId, session) {
 
 export async function checkIfDatasetExists(session, datasetUrl) {
     try {
-        const dataset = await getSolidDataset(datasetUrl, { fetch: session.fetch });
+        await getSolidDataset(datasetUrl, { fetch: session.fetch });
         return true
     }
     catch (ex) {
@@ -47,6 +48,27 @@ export async function getProfile(session) {
         return profileThing
     } catch (e) {
         console.log("ERROR")
+    }
+}
+
+export async function isAccountADoctor(session) {
+    try {
+        const profileThing = await getProfile(session)
+
+        const podsUrls = getUrlAll(
+            profileThing,
+            STORAGE_PREDICATE
+        );
+        const pod = podsUrls[0]
+        const containerUri = `${pod}Solid-Health/`
+
+        const dataset = await getSolidDataset(`${containerUri}profile.ttl`, { fetch: session.fetch });
+
+        let thing = await getThing(dataset, `${containerUri}profile.ttl#profileData`)
+
+        return await getBoolean(thing, PROFILE.DOCTOR)
+    } catch (e) {
+        console.log(e)
     }
 }
 
@@ -183,7 +205,6 @@ export async function switchToGPAccount(session) {
         const dataset = await getSolidDataset(`${containerUri}profile.ttl`, { fetch: session.fetch });
 
         let thing = await getThing(dataset, `${containerUri}profile.ttl#profileData`)
-        console.log(thing)
 
         thing = await setBoolean(thing, PROFILE.DOCTOR, true)
 
