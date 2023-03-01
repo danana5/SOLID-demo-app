@@ -1,7 +1,7 @@
 import HomeToolbar from "@/components/toolbar";
 import { useSession, CombinedDataProvider, Text } from "@inrupt/solid-ui-react";
 import { Typography, Container, Card, TextField, Button, CardActions, CardContent, CardHeader, Avatar } from "@mui/material";
-import { getProfile, getOrCreateContainer, getProfileData } from "@/utils/pods"
+import { getProfile, getOrCreateContainer, getProfileData, updateProfileData } from "@/utils/pods"
 import { useEffect, useState } from "react";
 import { getSolidDataset, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
 import EditIcon from '@mui/icons-material/Edit';
@@ -14,10 +14,12 @@ export default function ProfilePage() {
 
     const { session } = useSession();
     const [container, setContainer] = useState()
+    const [containerUrl, setContainerUrl] = useState('')
     const [edit, setEdit] = useState(false)
     const [profile, setProfile] = useState({})
     const [pods, setPods] = useState()
     const [temp, setTemp] = useState()
+    const [loading, setLoading] = useState()
     let profilePage
 
 
@@ -47,7 +49,8 @@ export default function ProfilePage() {
             setPods(podsUrls)
             const pod = podsUrls[0]
             const containerUri = `${pod}Solid-Health/`
-
+            setContainerUrl(`${pod}Solid-Health/`)
+            console.log(containerUrl)
 
             setContainer(await getOrCreateContainer(containerUri, session))
             await assignDataToProfile(await getProfileData(containerUri, session))
@@ -57,6 +60,7 @@ export default function ProfilePage() {
     function handleEdit() {
         setTemp(profile)
         setEdit(!edit)
+
     }
 
     function getIntials() {
@@ -67,7 +71,10 @@ export default function ProfilePage() {
     }
 
     function handleSave() {
+        setLoading(true)
+        updateProfileData(temp, containerUrl, session)
         setProfile(temp)
+        setLoading(false)
         setEdit(false)
     }
 
@@ -78,6 +85,8 @@ export default function ProfilePage() {
             ...temp,
             [evt.target.name]: value
         });
+
+        console.log(temp)
     }
 
     if (!edit) {

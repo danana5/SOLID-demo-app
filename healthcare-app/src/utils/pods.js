@@ -127,7 +127,29 @@ export async function createProfileData(profileDataset, session, url) {
         .addStringNoLocale(PROFILE.TELEPHONE, '')
         .build()
 
-    const dataset = setThing(profileDataset, profileData)
+    const dataset = await setThing(profileDataset, profileData)
 
     await saveSolidDatasetAt(url, dataset, { fetch: session.fetch })
+}
+
+export async function updateProfileData(profile, containerUrl, session) {
+    try {
+        console.log("here")
+        console.log(profile)
+        const dataset = await getSolidDataset(`${containerUrl}profile.ttl`, { fetch: session.fetch });
+        const profileData = buildThing(createThing({ name: 'profileData' }))
+            .addStringNoLocale(PROFILE.DATE_CREATED, profile.dateCreated)
+            .addStringNoLocale(PROFILE.ADDRESS, profile.address)
+            .addStringNoLocale(PROFILE.GIVEN_NAME, profile.givenName)
+            .addStringNoLocale(PROFILE.FAMILY_NAME, profile.familyName)
+            .addStringNoLocale(PROFILE.EMAIL, profile.email)
+            .addStringNoLocale(PROFILE.TELEPHONE, profile.telephone)
+            .build()
+
+        const thing = await setThing(dataset, profileData)
+
+        await saveSolidDatasetAt(`${containerUrl}profile.ttl`, thing, { fetch: session.fetch })
+    } catch (e) {
+        console.log(e)
+    }
 }
