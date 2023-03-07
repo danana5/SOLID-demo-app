@@ -13,10 +13,48 @@ import {
     setThing,
     setBoolean,
     getUrlAll,
-    getBoolean
+    getBoolean,
+    hasResourceAcl,
+    getResourceInfoWithAcl,
+    createAcl,
+    getResourceAcl,
+    setAgentResourceAccess
 } from "@inrupt/solid-client";
 import { PROFILE, STORAGE_PREDICATE } from "./predicates";
 
+const permissionsForGP = { read: true, write: true, append: true, control: true }
+const permissionsForPatient = { read: true, write: true, append: false, control: false }
+const readOnlyPermissions = { read: true, write: false, append: false, control: false }
+
+
+async function getContainerUri(session) {
+    const profileThing = await getProfile(session)
+
+    const podsUrls = getUrlAll(
+        profileThing,
+        STORAGE_PREDICATE
+    );
+    const pod = podsUrls[0]
+    const containerUri = `${pod}Solid-Health/`
+
+    return containerUri
+}
+
+
+async function getAclPermissions(datasetUrl, session) {
+    const datasetWithAcl = await getResourceInfoWithAcl(datasetUrl, { fetch: session.fetch })
+
+    let datasetAcl
+
+    if (!hasResourceAcl(datasetWithAcl)) {
+        datasetAcl = createAcl(datasetWithAcl)
+        return { dataset: datasetWithAcl, acl: datasetAcl }
+    }
+    else {
+        let acl = await getResourceAcl(datasetWithAcl)
+        return { dataset: datasetWithAcl, acl }
+    }
+}
 
 export async function getPodUrls(webId, session) {
     const pods = await getPodUrlAll(webId, { fetch: session.fetch });
@@ -43,7 +81,7 @@ export async function checkIfDatasetExists(session, datasetUrl) {
 export async function getProfile(session) {
     try {
         const dataset = await getSolidDataset(session.info.webId)
-        const profileThing = getThing(dataset, session.info.webId)
+        const profileThing = await getThing(dataset, session.info.webId)
 
         return profileThing
     } catch (e) {
@@ -148,6 +186,8 @@ export async function createProfileData(profileDataset, session, url) {
         .addStringNoLocale(PROFILE.FAMILY_NAME, '')
         .addStringNoLocale(PROFILE.EMAIL, '')
         .addStringNoLocale(PROFILE.TELEPHONE, '')
+        .addStringNoLocale(PROFILE.BIRTH_DATE, '')
+        .addStringNoLocale(PROFILE.DOCTORS_ID, '')
         .addBoolean(PROFILE.DOCTOR, false)
         .build()
 
@@ -166,6 +206,8 @@ export async function updateProfileData(profile, containerUrl, session) {
             .addStringNoLocale(PROFILE.FAMILY_NAME, profile.familyName)
             .addStringNoLocale(PROFILE.EMAIL, profile.email)
             .addStringNoLocale(PROFILE.TELEPHONE, profile.telephone)
+            .addStringNoLocale(PROFILE.BIRTH_DATE, profile.birthDate)
+            .addStringNoLocale(PROFILE.DOCTORS_ID, profile.doctorsId)
             .addBoolean(PROFILE.DOCTOR, profile.doctor)
             .build()
 
@@ -212,4 +254,47 @@ export async function switchToGPAccount(session) {
 
         await saveSolidDatasetAt(`${containerUri}profile.ttl`, thing, { fetch: session.fetch })
     }
+}
+
+export async function addPatient(webId, session) {
+    // ADD PATIENT AND CHECK FOR ACCESS
+}
+
+export async function addGP(webId, session) {
+    // GIVE GP ACCESS TO APPOINTMENTS + PRESCRIPTIONS + PROFILE
+
+    const containerUri = await getContainerUri(session)
+    const profileUri = containerUri + 'profile.ttl'
+    const appointmentsUri = containerUri + 'appointments.ttl'
+    const prescriptionsUri = containerUri + 'prescriptions.ttl'
+
+    const profile = await getAclPermissions(profileUri, session)
+    const appointments = await getAclPermissions(appointmentsUri, session)
+    const prescriptions = await getAclPermissions(prescriptionsUri, session)
+
+    // UPDATE THE ACLS
+    profile.acl = setAgentResourceAccess(profile.acl, webId, readOnlyPermissions)
+    appointments.acl = setAgentResourceAccess(appointments.acl, webId, permissionsForGP)
+    prescriptions.acl = setAgentResourceAccess(prescriptions.acl, webId, permissionsForGP)
+
+    await saveAclFor(profile.dataset, profile.acl, { fetch: session.fetch })
+    await saveAclFor(appointments.dataset, appointments.acl, { fetch: session.fetch })
+    await saveAclFor(prescriptions.dataset, prescriptions.acl, { fetch: session.fetch })
+}
+
+export async function removePatient(webId, session) {
+    // REMOVE PATIENT FROM GP LIST
+}
+
+export async function removeDoctor(webId, session) {
+    // REMOVE DOCTOR AND THEIR PERMISSIONS
+}
+
+export async function updatePatients(patients, session) {
+    // UPDATE PATIENTS
+}
+
+export async function getPatients(session) {
+
+    // RETRIEVE A DOCTORS PATIENTS LIST FROM index.ttl
 }

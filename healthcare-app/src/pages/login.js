@@ -7,10 +7,15 @@ import Button from '@mui/material/Button';
 import LoginIcon from '@mui/icons-material/Login';
 import Typography from '@mui/material/Typography';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { Container, Stack } from "@mui/material";
+import { useState } from "react";
 
 
 export default function LoginPage() {
+
+    const [oid, setOid] = useState('https://login.inrupt.com/');
 
     const loginError = (error) => {
         console.log('LOGIN ERROR' + error)
@@ -18,6 +23,10 @@ export default function LoginPage() {
 
     const authOptions = {
         clientName: "Solid Health",
+    };
+
+    const handleChange = (event) => {
+        setOid(event.target.value);
     };
 
     return (
@@ -43,11 +52,19 @@ export default function LoginPage() {
                     <CardHeader title="Connect Your Pod">
                     </CardHeader>
                     <CardContent>
-                        <Typography >Please click the button below in order to connect your Solid Pod.</Typography>
+                        <Typography >Please select your identity provider and log in to connect your pod.</Typography>
+                        <Select
+                            value={oid}
+                            label="Identity Provider"
+                            onChange={handleChange}
+                        >
+                            <MenuItem value={'https://solidcommunity.net'}>solidcommunity.net</MenuItem>
+                            <MenuItem value={'https://login.inrupt.com/'}>login.inrupt.com</MenuItem>
+                        </Select>
                     </CardContent>
                     <CardActions>
                         <LoginButton
-                            oidcIssuer="https://login.inrupt.com/"
+                            oidcIssuer={oid}
                             onError={loginError}
                             authOptions={authOptions}
                             redirectUrl="http://localhost:3000/profile"
