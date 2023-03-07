@@ -18,11 +18,17 @@ import {
     getResourceInfoWithAcl,
     createAcl,
     getResourceAcl,
-    setAgentResourceAccess
+    hasFallbackAcl,
+    setAgentResourceAccess,
+    hasAcl,
+    hasAccessibleAcl,
+    saveAclFor,
+    createAclFromFallbackAcl,
+    setAgentDefaultAccess
 } from "@inrupt/solid-client";
 import { PROFILE, STORAGE_PREDICATE } from "./predicates";
 
-const permissionsForGP = { read: true, write: true, append: true, control: true }
+const permissionsAll = { read: true, write: true, append: true, control: true }
 const permissionsForPatient = { read: true, write: true, append: false, control: false }
 const readOnlyPermissions = { read: true, write: false, append: false, control: false }
 
@@ -42,17 +48,17 @@ async function getContainerUri(session) {
 
 
 async function getAclPermissions(datasetUrl, session) {
-    const datasetWithAcl = await getResourceInfoWithAcl(datasetUrl, { fetch: session.fetch })
+    const dataset = await getSolidDataset(datasetUrl, { fetch: session.fetch })
 
     let datasetAcl
 
-    if (!hasResourceAcl(datasetWithAcl)) {
-        datasetAcl = createAcl(datasetWithAcl)
-        return { dataset: datasetWithAcl, acl: datasetAcl }
+    if (!hasAcl(dataset)) {
+        datasetAcl = createAcl(dataset)
+        return { dataset: dataset, acl: datasetAcl }
     }
     else {
-        let acl = await getResourceAcl(datasetWithAcl)
-        return { dataset: datasetWithAcl, acl }
+        let acl = await getResourceAcl(dataset)
+        return { dataset: dataset, acl }
     }
 }
 
@@ -155,6 +161,7 @@ async function createTurtleFiles(containerUri, session) {
         }
     )
 
+
     await saveSolidDatasetAt(
         appointmentsUrl,
         createSolidDataset(),
@@ -162,6 +169,7 @@ async function createTurtleFiles(containerUri, session) {
             fetch: session.fetch,
         }
     );
+
 
     await saveSolidDatasetAt(
         prescriptionsUrl,
@@ -171,10 +179,41 @@ async function createTurtleFiles(containerUri, session) {
         }
     );
 
+
     await createProfileData(profileDataset, session, profileUrl)
 
     console.log("TURLTE FILES ALL CREATED!")
 }
+
+// export async function grantAccessToDataset(session, datasetUrl) {
+//     const myDatasetWithAcl = await getResourceInfoWithAcl(datasetUrl, { fetch: session.fetch })
+
+//     let myDatasetsAcl;
+//     if (!hasResourceAcl(myDatasetWithAcl)) {
+//         if (!hasAccessibleAcl(myDatasetWithAcl)) {
+//             alert("The current user does not have permission to change access rights to this resource.")
+//         };
+//         if (!hasFallbackAcl(myDatasetWithAcl)) {
+//             alert("The current user does not have permission to see who currently has access to this resource.")
+//         }
+//         myDatasetsAcl = createAclFromFallbackAcl(myDatasetWithAcl)
+//     }
+//     else myDatasetsAcl = getResourceAcl(myDatasetWithAcl)
+
+//     let updatedAcl = setAgentResourceAccess(
+//         myDatasetsAcl,
+//         session.info.webId,
+//         permissionsAll
+//     )
+
+//     updatedAcl = setAgentDefaultAccess(
+//         updatedAcl,
+//         session.info.webId,
+//         permissionsAll
+//     )
+//     await saveAclFor(myDatasetWithAcl, updatedAcl, { fetch: session.fetch })
+// }
+
 
 export async function createProfileData(profileDataset, session, url) {
 
@@ -271,15 +310,17 @@ export async function addGP(webId, session) {
     const profile = await getAclPermissions(profileUri, session)
     const appointments = await getAclPermissions(appointmentsUri, session)
     const prescriptions = await getAclPermissions(prescriptionsUri, session)
-
+    console.log(hasAcl(profile.dataset))
     // UPDATE THE ACLS
     profile.acl = setAgentResourceAccess(profile.acl, webId, readOnlyPermissions)
     appointments.acl = setAgentResourceAccess(appointments.acl, webId, permissionsForGP)
     prescriptions.acl = setAgentResourceAccess(prescriptions.acl, webId, permissionsForGP)
 
-    await saveAclFor(profile.dataset, profile.acl, { fetch: session.fetch })
-    await saveAclFor(appointments.dataset, appointments.acl, { fetch: session.fetch })
-    await saveAclFor(prescriptions.dataset, prescriptions.acl, { fetch: session.fetch })
+
+
+    // await saveAclFor(profile.dataset, profile.acl, { fetch: session.fetch })
+    // await saveAclFor(appointments.dataset, appointments.acl, { fetch: session.fetch })
+    // await saveAclFor(prescriptions.dataset, prescriptions.acl, { fetch: session.fetch })
 }
 
 export async function removePatient(webId, session) {

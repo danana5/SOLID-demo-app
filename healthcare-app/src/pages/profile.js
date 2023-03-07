@@ -103,7 +103,9 @@ export default function ProfilePage() {
     }
 
     function handleAddGP() {
-        console.log("Clicked")
+        addGP(newDoctorId, session)
+        profile.doctorsId = newDoctorId
+        updateProfileData(profile, containerUrl, session)
     }
 
     if (!edit) {
