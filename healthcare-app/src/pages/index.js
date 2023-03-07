@@ -9,6 +9,8 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 const actions = [
   { icon: <FileCopyIcon />, name: 'Copy' },
@@ -17,6 +19,11 @@ const actions = [
 ];
 
 export default function HomePage() {
+  // const router = 
+
+  // useEffect(() => {
+
+  // }, [])
 
   return (
     <div>

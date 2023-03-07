@@ -68,7 +68,7 @@ export default function HomeToolbar({ }) {
         }
 
         isGP()
-    }, [])
+    }, [session, session.info.isLoggedIn])
 
 
     return (
@@ -90,6 +90,12 @@ export default function HomeToolbar({ }) {
                     >
                         <Link href="/home">Solid Health</Link>
                     </Typography>
+                    {color == "secondary" &&
+                        <Button
+                            sx={{ my: 2, color: 'white', display: 'block', display: { xs: 'none', md: 'flex' }, maxWidth: 150 }}
+                        >
+                            <Link href="/patients">Your Patients</Link>
+                        </Button>}
                     <Button
                         sx={{ my: 2, color: 'white', display: 'block', display: { xs: 'none', md: 'flex' }, maxWidth: 150 }}
                     >
@@ -100,6 +106,7 @@ export default function HomeToolbar({ }) {
                     >
                         <Link href="/prescriptions">Prescriptions</Link>
                     </Button>
+
                     {rightSide}
                 </Toolbar>
             </AppBar>

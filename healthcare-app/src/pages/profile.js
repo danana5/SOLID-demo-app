@@ -121,9 +121,10 @@ export default function ProfilePage() {
     else {
         profilePage = (
             <div>
-                <CardHeader title="Edit Your Profile"></CardHeader>
+                <CardHeader titleTypographyProps={{ variant: "subtitle1", color: "text.secondary" }} title={session.info.webId} avatar={
+                    <Avatar variant="rounded" sx={{ width: 80, height: 80, position: "center", }} >{getIntials()}</Avatar>}>
+                </CardHeader>
                 <CardContent>
-                    <Avatar variant="rounded" sx={{ width: 80, height: 80, position: "center", mb: 3 }} >{getIntials()}</Avatar>
                     <div><TextField value={temp.givenName} onChange={handleChange} name="givenName" sx={{ mb: 1 }} label="First Name"></TextField></div>
                     <div><TextField value={temp.familyName} onChange={handleChange} name="familyName" sx={{ mb: 1 }} label="Surname"></TextField></div>
                     <div><TextField value={temp.address} onChange={handleChange} name="address" sx={{ mb: 1 }} label="Address"></TextField></div>
@@ -147,9 +148,10 @@ export default function ProfilePage() {
 
     return (
         <div>
-            <HomeToolbar doctor={profile.doctor}></HomeToolbar>
+            <HomeToolbar></HomeToolbar>
             <Container>
-                <Card sx={{ mt: 5, maxWidth: 400, mr: 50, ml: 50 }} variant="outlined">{profilePage}</Card>
+                <Typography sx={{ mt: 5, maxWidth: 400, mr: 50, ml: 50 }} variant="h5" color="black">Your Profile</Typography>
+                <Card sx={{ mt: 2, maxWidth: 400, mr: 50, ml: 50 }} variant="outlined">{profilePage}</Card>
                 {adminLogIn}
             </Container>
         </div >
