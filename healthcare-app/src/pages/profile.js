@@ -1,7 +1,7 @@
 import HomeToolbar from "@/components/toolbar";
 import { useSession } from "@inrupt/solid-ui-react";
 import { Typography, Container, Card, TextField, Button, CardActions, CardContent, CardHeader, Avatar } from "@mui/material";
-import { getProfile, getOrCreateContainer, getProfileData, updateProfileData, getProfilePhoto, addGP } from "@/utils/pods"
+import { getProfile, getOrCreateContainer, getProfileData, updateProfileData, getProfilePhoto, addGP, testAccess } from "@/utils/pods"
 import { useEffect, useState } from "react";
 import { getUrlAll, getStringNoLocale, getBoolean } from "@inrupt/solid-client";
 import EditIcon from '@mui/icons-material/Edit';
@@ -60,7 +60,7 @@ export default function ProfilePage() {
             );
             setPods(podsUrls)
             const pod = podsUrls[0]
-            const containerUri = `${pod}Solid-Health/`
+            const containerUri = `${pod}Solid-Health-Test3/`
             setContainerUrl(containerUri)
             setContainer(await getOrCreateContainer(containerUri, session))
             await assignDataToProfile(await getProfileData(containerUri, session))
@@ -108,6 +108,10 @@ export default function ProfilePage() {
         updateProfileData(profile, containerUrl, session)
     }
 
+    function test() {
+        testAccess(session)
+    }
+
     if (!edit) {
         profilePage = (
             <div>
@@ -125,6 +129,7 @@ export default function ProfilePage() {
                 <CardActions>
                     <Button onClick={handleEdit} startIcon={<EditIcon />} >Edit</Button>
                     <Button onClick={handleLogout} startIcon={<LogoutIcon />}>Logout</Button>
+                    <Button onClick={test}>Test</Button>
                 </CardActions>
             </div>
 
@@ -161,7 +166,7 @@ export default function ProfilePage() {
 
     if (!profile.doctorsId) {
         doctorCard = (
-            <Card sx={{ mt: 2, maxWidth: 400, mr: 50, ml: 50 }} variant="outlined">
+            <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
                 <CardContent>
                     <Typography>You have not add your GP to your account yet.</Typography>
                 </CardContent>
@@ -172,7 +177,7 @@ export default function ProfilePage() {
             </Card>)
     } else {
         doctorCard = (
-            <Card sx={{ mt: 2, maxWidth: 400, mr: 50, ml: 50 }} variant="outlined">
+            <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
                 <Typography>The WebId of your GP is: {profile.doctorsId}</Typography>
             </Card>
         )
@@ -182,8 +187,8 @@ export default function ProfilePage() {
         <div>
             <HomeToolbar></HomeToolbar>
             <Container>
-                <Typography sx={{ mt: 5, maxWidth: 400, mr: 50, ml: 50 }} variant="h5" color="black">Your Profile</Typography>
-                <Card sx={{ mt: 2, maxWidth: 400, mr: 50, ml: 50 }} variant="outlined">{profilePage}</Card>
+                <Typography sx={{ mt: 5, mr: 50, ml: 50 }} variant="h5" color="black">Your Profile</Typography>
+                <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">{profilePage}</Card>
                 {adminLogIn}
                 {doctorCard}
             </Container>

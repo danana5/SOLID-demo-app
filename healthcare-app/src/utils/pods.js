@@ -24,11 +24,13 @@ import {
     hasAccessibleAcl,
     saveAclFor,
     createAclFromFallbackAcl,
-    setAgentDefaultAccess
+    setAgentDefaultAccess,
+    universalAccess,
+    getAgentDefaultAccess
 } from "@inrupt/solid-client";
 import { PROFILE, STORAGE_PREDICATE } from "./predicates";
 
-const permissionsAll = { read: true, write: true, append: true, control: true }
+const permissionsAll = { read: true, write: true, append: true, control: true, }
 const permissionsForPatient = { read: true, write: true, append: false, control: false }
 const readOnlyPermissions = { read: true, write: false, append: false, control: false }
 
@@ -41,30 +43,9 @@ async function getContainerUri(session) {
         STORAGE_PREDICATE
     );
     const pod = podsUrls[0]
-    const containerUri = `${pod}Solid-Health/`
+    const containerUri = `${pod}Solid-Health-Test3/`
 
     return containerUri
-}
-
-
-async function getAclPermissions(datasetUrl, session) {
-    const dataset = await getSolidDataset(datasetUrl, { fetch: session.fetch })
-
-    let datasetAcl
-
-    if (!hasAcl(dataset)) {
-        datasetAcl = createAcl(dataset)
-        return { dataset: dataset, acl: datasetAcl }
-    }
-    else {
-        let acl = await getResourceAcl(dataset)
-        return { dataset: dataset, acl }
-    }
-}
-
-export async function getPodUrls(webId, session) {
-    const pods = await getPodUrlAll(webId, { fetch: session.fetch });
-    return pods
 }
 
 export async function checkIfDatasetExists(session, datasetUrl) {
@@ -104,7 +85,7 @@ export async function isAccountADoctor(session) {
             STORAGE_PREDICATE
         );
         const pod = podsUrls[0]
-        const containerUri = `${pod}Solid-Health/`
+        const containerUri = `${pod}Solid-Health-Test3/`
 
         const dataset = await getSolidDataset(`${containerUri}profile.ttl`, { fetch: session.fetch });
 
@@ -161,6 +142,11 @@ async function createTurtleFiles(containerUri, session) {
         }
     )
 
+    let acl = createAcl(profileDataset)
+    acl = setAgentDefaultAccess(acl, session.info.webId, permissionsAll)
+    await saveAclFor(profileDataset, acl, { fetch: session.fetch })
+
+    console.log(await getAgentDefaultAccess(await getResourceAcl(profileDataset), session.info.webId))
 
     await saveSolidDatasetAt(
         appointmentsUrl,
@@ -184,35 +170,6 @@ async function createTurtleFiles(containerUri, session) {
 
     console.log("TURLTE FILES ALL CREATED!")
 }
-
-// export async function grantAccessToDataset(session, datasetUrl) {
-//     const myDatasetWithAcl = await getResourceInfoWithAcl(datasetUrl, { fetch: session.fetch })
-
-//     let myDatasetsAcl;
-//     if (!hasResourceAcl(myDatasetWithAcl)) {
-//         if (!hasAccessibleAcl(myDatasetWithAcl)) {
-//             alert("The current user does not have permission to change access rights to this resource.")
-//         };
-//         if (!hasFallbackAcl(myDatasetWithAcl)) {
-//             alert("The current user does not have permission to see who currently has access to this resource.")
-//         }
-//         myDatasetsAcl = createAclFromFallbackAcl(myDatasetWithAcl)
-//     }
-//     else myDatasetsAcl = getResourceAcl(myDatasetWithAcl)
-
-//     let updatedAcl = setAgentResourceAccess(
-//         myDatasetsAcl,
-//         session.info.webId,
-//         permissionsAll
-//     )
-
-//     updatedAcl = setAgentDefaultAccess(
-//         updatedAcl,
-//         session.info.webId,
-//         permissionsAll
-//     )
-//     await saveAclFor(myDatasetWithAcl, updatedAcl, { fetch: session.fetch })
-// }
 
 
 export async function createProfileData(profileDataset, session, url) {
@@ -297,6 +254,17 @@ export async function switchToGPAccount(session) {
 
 export async function addPatient(webId, session) {
     // ADD PATIENT AND CHECK FOR ACCESS
+
+
+
+}
+
+export async function testAccess(session) {
+    const containerUri = await getContainerUri(session)
+    const profileUri = containerUri + 'profile.ttl'
+
+    let dataset = await getProfileData(containerUri, session)
+    s
 }
 
 export async function addGP(webId, session) {
@@ -307,20 +275,10 @@ export async function addGP(webId, session) {
     const appointmentsUri = containerUri + 'appointments.ttl'
     const prescriptionsUri = containerUri + 'prescriptions.ttl'
 
-    const profile = await getAclPermissions(profileUri, session)
-    const appointments = await getAclPermissions(appointmentsUri, session)
-    const prescriptions = await getAclPermissions(prescriptionsUri, session)
-    console.log(hasAcl(profile.dataset))
-    // UPDATE THE ACLS
-    profile.acl = setAgentResourceAccess(profile.acl, webId, readOnlyPermissions)
-    appointments.acl = setAgentResourceAccess(appointments.acl, webId, permissionsForGP)
-    prescriptions.acl = setAgentResourceAccess(prescriptions.acl, webId, permissionsForGP)
 
-
-
-    // await saveAclFor(profile.dataset, profile.acl, { fetch: session.fetch })
-    // await saveAclFor(appointments.dataset, appointments.acl, { fetch: session.fetch })
-    // await saveAclFor(prescriptions.dataset, prescriptions.acl, { fetch: session.fetch })
+    universalAccess.setAgentAccess(profileUri, webId, readOnlyPermissions, { fetch: session.fetch })
+    universalAccess.setAgentAccess(appointmentsUri, webId, permissionsAll, { fetch: session.fetch })
+    universalAccess.setAgentAccess(prescriptionsUri, webId, permissionsAll, { fetch: session.fetch })
 }
 
 export async function removePatient(webId, session) {
