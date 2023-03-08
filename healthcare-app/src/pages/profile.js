@@ -29,6 +29,8 @@ export default function ProfilePage() {
     let adminLogIn
     let doctorCard
     let newDoctorId
+
+    const [gp, setGP] = useState()
     const router = useRouter()
 
 
@@ -60,7 +62,7 @@ export default function ProfilePage() {
             );
             setPods(podsUrls)
             const pod = podsUrls[0]
-            const containerUri = `${pod}Solid-Health-Test3/`
+            const containerUri = `${pod}Solid-Health/`
             setContainerUrl(containerUri)
             setContainer(await getOrCreateContainer(containerUri, session))
             await assignDataToProfile(await getProfileData(containerUri, session))
@@ -103,9 +105,15 @@ export default function ProfilePage() {
     }
 
     function handleAddGP() {
-        addGP(newDoctorId, session)
-        profile.doctorsId = newDoctorId
+        addGP(gp, session)
+        profile.doctorsId = gp
         updateProfileData(profile, containerUrl, session)
+    }
+
+    function handleNewGPAddress(evt) {
+        const value = evt.target.value
+
+        setGP(value)
     }
 
     function test() {
@@ -164,14 +172,14 @@ export default function ProfilePage() {
             </Link>)
     }
 
-    if (!profile.doctorsId) {
+    if (!profile.doctorsId || profile.doctorsId == undefined) {
         doctorCard = (
             <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
                 <CardContent>
                     <Typography>You have not add your GP to your account yet.</Typography>
                 </CardContent>
                 <CardActions>
-                    <TextField value={newDoctorId} label="GP's WebId"></TextField>
+                    <TextField value={newDoctorId} label="GP's WebId" onChange={handleNewGPAddress}></TextField>
                     <Button onClick={handleAddGP} startIcon={<AddIcon />}>Add GP</Button>
                 </CardActions>
             </Card>)

@@ -43,7 +43,7 @@ async function getContainerUri(session) {
         STORAGE_PREDICATE
     );
     const pod = podsUrls[0]
-    const containerUri = `${pod}Solid-Health-Test3/`
+    const containerUri = `${pod}Solid-Health/`
 
     return containerUri
 }
@@ -85,7 +85,7 @@ export async function isAccountADoctor(session) {
             STORAGE_PREDICATE
         );
         const pod = podsUrls[0]
-        const containerUri = `${pod}Solid-Health-Test3/`
+        const containerUri = `${pod}Solid-Health/`
 
         const dataset = await getSolidDataset(`${containerUri}profile.ttl`, { fetch: session.fetch });
 
@@ -141,12 +141,6 @@ async function createTurtleFiles(containerUri, session) {
             fetch: session.fetch,
         }
     )
-
-    let acl = createAcl(profileDataset)
-    acl = setAgentDefaultAccess(acl, session.info.webId, permissionsAll)
-    await saveAclFor(profileDataset, acl, { fetch: session.fetch })
-
-    console.log(await getAgentDefaultAccess(await getResourceAcl(profileDataset), session.info.webId))
 
     await saveSolidDatasetAt(
         appointmentsUrl,
@@ -275,10 +269,14 @@ export async function addGP(webId, session) {
     const appointmentsUri = containerUri + 'appointments.ttl'
     const prescriptionsUri = containerUri + 'prescriptions.ttl'
 
+    console.log(webId)
+
 
     universalAccess.setAgentAccess(profileUri, webId, readOnlyPermissions, { fetch: session.fetch })
     universalAccess.setAgentAccess(appointmentsUri, webId, permissionsAll, { fetch: session.fetch })
     universalAccess.setAgentAccess(prescriptionsUri, webId, permissionsAll, { fetch: session.fetch })
+
+    console.log('ACCESS GRANTED')
 }
 
 export async function removePatient(webId, session) {
