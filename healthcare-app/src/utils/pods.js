@@ -289,9 +289,11 @@ export async function testAccess(session) {
 
     const thing = getThing(dataset, 'https://storage.inrupt.com/8dee44e6-2bf3-4965-a783-998d96a9bd49/Solid-Health/profile.ttl#profileData')
 
-    const name = getStringNoLocale(thing, PROFILE.GIVEN_NAME)
+    let appointmentDataset = await getSolidDataset('https://storage.inrupt.com/8dee44e6-2bf3-4965-a783-998d96a9bd49/Solid-Health/appointments.ttl', { fetch: session.fetch })
 
-    console.log(name)
+    appointmentDataset = setThing(appointmentDataset, thing)
+
+    await saveSolidDatasetAt('https://storage.inrupt.com/8dee44e6-2bf3-4965-a783-998d96a9bd49/Solid-Health/appointments.ttl', appointmentDataset, { fetch: session.fetch })
 
 }
 
@@ -326,6 +328,23 @@ export async function updatePatients(patients, session) {
 }
 
 export async function getPatients(session) {
-
     // RETRIEVE A DOCTORS PATIENTS LIST FROM index.ttl
+
+    let patients = []
+    const containerUrl = await getContainerUri(session)
+
+    const index = await getSolidDataset(containerUrl + 'index.ttl', { fetch: session.fetch })
+
+    const patientThings = await getThingAll(index)
+
+    for (let thing of patientThings) {
+        let patient = {}
+        patient.name = getStringNoLocale(thing, PATIENT.GIVEN_NAME) + ' ' + getStringNoLocale(thing, PATIENT.FAMILY_NAME)
+        patient.dob = getStringNoLocale(thing, PATIENT.BIRTH_DATE)
+        patient.webId = getStringNoLocale(thing, PATIENT.WEB_ID)
+
+        patients.push(patient)
+    }
+
+    return patients
 }
