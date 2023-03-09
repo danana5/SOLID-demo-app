@@ -137,7 +137,7 @@ export default function ProfilePage() {
                 <CardActions>
                     <Button onClick={handleEdit} startIcon={<EditIcon />} >Edit</Button>
                     <Button onClick={handleLogout} startIcon={<LogoutIcon />}>Logout</Button>
-                    <Button onClick={test}>Test</Button>
+                    {/* <Button onClick={test}>Test</Button> */}
                 </CardActions>
             </div>
 

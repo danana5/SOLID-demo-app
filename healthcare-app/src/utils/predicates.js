@@ -23,8 +23,14 @@ export const PATIENT = {
 export const PRESCRIPTION = {
     DRUG: 'https://schema.org/Drug',
     DOSAGE: 'https://schema.org/dosageForm',
-    SCHEDULE: 'https://schema.org/dosageForm',
+    SCHEDULE: 'https://schema.org/doseSchedule',
     PATIENT: 'https://schema.org/name',
     DOCTOR: 'https://schema.org/Physician',
     DATE_ISSUED: 'https://schema.org/dateIssued'
+}
+
+export const APPOINTMENT = {
+    DATETIME: 'https://schema.org/DateTime',
+    DOCTOR: 'https://schema.org/Physician',
+    PATIENT: 'https://schema.org/name',
 }

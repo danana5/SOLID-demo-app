@@ -28,9 +28,10 @@ import {
     universalAccess,
     getAgentDefaultAccess,
     getStringNoLocale,
-    removeThing
+    removeThing,
+    getDatetime
 } from "@inrupt/solid-client";
-import { PROFILE, STORAGE_PREDICATE, PATIENT, PRESCRIPTION } from "./predicates";
+import { PROFILE, STORAGE_PREDICATE, PATIENT, PRESCRIPTION, APPOINTMENT } from "./predicates";
 
 const permissionsAll = { read: true, write: true, append: true, control: true, }
 const permissionsForPatient = { read: true, write: true, append: false, control: false }
@@ -415,4 +416,57 @@ export async function getPrescriptions(session) {
     }
 
     return prescriptions
+}
+
+
+export async function getAppointments(session) {
+    let appointments = []
+    const containerUrl = await getContainerUri(session)
+
+    const appointmentsDataset = await getSolidDataset(containerUrl + 'appointments.ttl', { fetch: session.fetch })
+
+    const appointmentThings = await getThingAll(appointmentsDataset)
+
+    for (let thing of appointmentThings) {
+        let appointment = {}
+
+        appointment.patient = getStringNoLocale(thing, APPOINTMENT.PATIENT)
+        appointment.doctor = getStringNoLocale(thing, APPOINTMENT.DOCTOR)
+        appointment.dateTime = getStringNoLocale(thing, APPOINTMENT.DATETIME)
+
+        appointments.push(appointment)
+    }
+
+    return appointments
+}
+
+export async function makeAppointment(patient, appointment, session) {
+    // Make the appointment on both patient and doctors appointment thing
+
+    const containerUrl = await getContainerUri(session)
+
+    const dataset = await getSolidDataset(patient.webId)
+    const profileThing = getThing(dataset, patient.webId)
+    const podsUrls = getUrlAll(
+        profileThing,
+        STORAGE_PREDICATE
+    );
+    const pod = podsUrls[0]
+    const appointmentUri = `${pod}Solid-Health/appointments.ttl`
+
+    let appointmentDatasetPatient = await getSolidDataset(appointmentUri, { fetch: session.fetch })
+    let appointmentDatasetDoctor = await getSolidDataset(containerUrl + 'appointments.ttl', { fetch: session.fetch })
+
+    let appointmentThing = buildThing(createThing({ name: 'Appointment @ ' + appointment.dateTime }))
+        .setStringNoLocale(APPOINTMENT.DATETIME, appointment.dateTime)
+        .setStringNoLocale(APPOINTMENT.DOCTOR, appointment.doctor)
+        .setStringNoLocale(APPOINTMENT.PATIENT, patient.name)
+        .build()
+
+    appointmentDatasetDoctor = setThing(appointmentDatasetDoctor, appointmentThing)
+    appointmentDatasetPatient = setThing(appointmentDatasetPatient, appointmentThing)
+
+
+    await saveSolidDatasetAt(containerUrl + 'appointments.ttl', appointmentDatasetDoctor, { fetch: session.fetch })
+    await saveSolidDatasetAt(appointmentUri, appointmentDatasetPatient, { fetch: session.fetch })
 }

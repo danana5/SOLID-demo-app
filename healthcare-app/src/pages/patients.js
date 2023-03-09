@@ -66,7 +66,7 @@ export default function Patients() {
                                         <ListItemAvatar>
                                             <Avatar />
                                         </ListItemAvatar>
-                                        <ListItemText primary={value.name} secondary={value.dob} />
+                                        <ListItemText primary={value.name} secondary={value.time} />
                                     </ListItem>
                                 )
                             })}

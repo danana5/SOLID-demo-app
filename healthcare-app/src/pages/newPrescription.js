@@ -15,7 +15,7 @@ export default function NewPrescription() {
 
     function handleNewPrescription() {
 
-        setPrescription({ ...prescription, patient: patient.webId })
+        setPrescription({ ...prescription, patient: patient.name })
         addPrescription(prescription, patient.webId, session)
     }
 
