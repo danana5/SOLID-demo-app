@@ -27,9 +27,10 @@ import {
     setAgentDefaultAccess,
     universalAccess,
     getAgentDefaultAccess,
-    getStringNoLocale
+    getStringNoLocale,
+    removeThing
 } from "@inrupt/solid-client";
-import { PROFILE, STORAGE_PREDICATE, PATIENT } from "./predicates";
+import { PROFILE, STORAGE_PREDICATE, PATIENT, PRESCRIPTION } from "./predicates";
 
 const permissionsAll = { read: true, write: true, append: true, control: true, }
 const permissionsForPatient = { read: true, write: true, append: false, control: false }
@@ -305,8 +306,6 @@ export async function addGP(webId, session) {
     const appointmentsUri = containerUri + 'appointments.ttl'
     const prescriptionsUri = containerUri + 'prescriptions.ttl'
 
-    console.log(webId)
-
 
     universalAccess.setAgentAccess(profileUri, webId, readOnlyPermissions, { fetch: session.fetch })
     universalAccess.setAgentAccess(appointmentsUri, webId, permissionsAll, { fetch: session.fetch })
@@ -317,14 +316,29 @@ export async function addGP(webId, session) {
 
 export async function removePatient(webId, session) {
     // REMOVE PATIENT FROM GP LIST
+    console.log('delete ' + webId)
+
+    const containerUrl = await getContainerUri(session)
+
+    let index = await getSolidDataset(containerUrl + 'index.ttl', { fetch: session.fetch })
+
+    const patientThings = await getThingAll(index)
+
+    for (let thing of patientThings) {
+        let id = getStringNoLocale(thing, PATIENT.WEB_ID)
+
+        if (id == webId) {
+            index = removeThing(index, thing)
+        }
+    }
+
+    await saveSolidDatasetAt(containerUrl + 'index.ttl', index, { fetch: session.fetch })
 }
 
 export async function removeDoctor(webId, session) {
     // REMOVE DOCTOR AND THEIR PERMISSIONS
-}
 
-export async function updatePatients(patients, session) {
-    // UPDATE PATIENTS
+
 }
 
 export async function getPatients(session) {
@@ -347,4 +361,58 @@ export async function getPatients(session) {
     }
 
     return patients
+}
+
+export async function addPrescription(prescription, webId, session) {
+    try {
+        const dataset = await getSolidDataset(webId)
+        const profileThing = getThing(dataset, webId)
+        const podsUrls = getUrlAll(
+            profileThing,
+            STORAGE_PREDICATE
+        );
+        const pod = podsUrls[0]
+        const prescriptionUri = `${pod}Solid-Health/prescriptions.ttl`
+
+        let prescriptionDataset = await getSolidDataset(prescriptionUri, { fetch: session.fetch })
+
+        let prescriptionThing = buildThing(createThing({ name: prescription.patient + prescription.date }))
+            .addStringNoLocale(PRESCRIPTION.DRUG, prescription.drug)
+            .addStringNoLocale(PRESCRIPTION.DOSAGE, prescription.dosage)
+            .addStringNoLocale(PRESCRIPTION.DOCTOR, prescription.doctor)
+            .addStringNoLocale(PRESCRIPTION.PATIENT, prescription.patient)
+            .addStringNoLocale(PRESCRIPTION.SCHEDULE, prescription.schedule)
+            .addStringNoLocale(PRESCRIPTION.DATE_ISSUED, prescription.dateIssued)
+            .build()
+
+        prescriptionDataset = setThing(prescriptionDataset, prescriptionThing)
+        await saveSolidDatasetAt(prescriptionUri, prescriptionDataset, { fetch: session.fetch })
+
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+export async function getPrescriptions(session) {
+    let prescriptions = []
+    const containerUrl = await getContainerUri(session)
+
+    const prescriptionsDataset = await getSolidDataset(containerUrl + 'prescriptions.ttl', { fetch: session.fetch })
+
+    const prescriptionThings = await getThingAll(prescriptionsDataset)
+
+    for (let thing of prescriptionThings) {
+        let prescription = {}
+
+        prescription.patient = getStringNoLocale(thing, PRESCRIPTION.PATIENT)
+        prescription.doctor = getStringNoLocale(thing, PRESCRIPTION.DOCTOR)
+        prescription.dateIssued = getStringNoLocale(thing, PRESCRIPTION.DATE_ISSUED)
+        prescription.drug = getStringNoLocale(thing, PRESCRIPTION.DRUG)
+        prescription.dosage = getStringNoLocale(thing, PRESCRIPTION.DOSAGE)
+        prescription.schedule = getStringNoLocale(thing, PRESCRIPTION.SCHEDULE)
+
+        prescriptions.push(prescription)
+    }
+
+    return prescriptions
 }

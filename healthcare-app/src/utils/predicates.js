@@ -19,3 +19,12 @@ export const PATIENT = {
     FAMILY_NAME: "https://schema.org/familyName",
     BIRTH_DATE: "https://schema.org/birthDate"
 }
+
+export const PRESCRIPTION = {
+    DRUG: 'https://schema.org/Drug',
+    DOSAGE: 'https://schema.org/dosageForm',
+    SCHEDULE: 'https://schema.org/dosageForm',
+    PATIENT: 'https://schema.org/name',
+    DOCTOR: 'https://schema.org/Physician',
+    DATE_ISSUED: 'https://schema.org/dateIssued'
+}
