@@ -12,3 +12,10 @@ export const PROFILE = {
     DOCTORS_ID: "https://schema.org/Physician",
     BIRTH_DATE: "https://schema.org/birthDate"
 }
+
+export const PATIENT = {
+    WEB_ID: "https://schema.org/url",
+    GIVEN_NAME: "https://schema.org/givenName",
+    FAMILY_NAME: "https://schema.org/familyName",
+    BIRTH_DATE: "https://schema.org/birthDate"
+}

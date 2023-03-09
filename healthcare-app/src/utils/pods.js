@@ -26,9 +26,10 @@ import {
     createAclFromFallbackAcl,
     setAgentDefaultAccess,
     universalAccess,
-    getAgentDefaultAccess
+    getAgentDefaultAccess,
+    getStringNoLocale
 } from "@inrupt/solid-client";
-import { PROFILE, STORAGE_PREDICATE } from "./predicates";
+import { PROFILE, STORAGE_PREDICATE, PATIENT } from "./predicates";
 
 const permissionsAll = { read: true, write: true, append: true, control: true, }
 const permissionsForPatient = { read: true, write: true, append: false, control: false }
@@ -165,7 +166,6 @@ async function createTurtleFiles(containerUri, session) {
     console.log("TURLTE FILES ALL CREATED!")
 }
 
-
 export async function createProfileData(profileDataset, session, url) {
 
     const date = new Date().toUTCString()
@@ -209,19 +209,6 @@ export async function updateProfileData(profile, containerUrl, session) {
     }
 }
 
-export async function getProfilePhoto(containerUrl, session) {
-    try {
-        const dataset = await getSolidDataset(`${containerUrl}`, { fetch: session.fetch });
-
-        const things = getThingAll(dataset, { fetch: session.fetch })
-
-        console.log(things)
-    }
-    catch (e) {
-        console.log(e)
-    }
-}
-
 export async function switchToGPAccount(session) {
 
     if (session.info.isLoggedIn) {
@@ -249,16 +236,63 @@ export async function switchToGPAccount(session) {
 export async function addPatient(webId, session) {
     // ADD PATIENT AND CHECK FOR ACCESS
 
+    try {
+        const dataset = await getSolidDataset(webId)
+        const profileThing = getThing(dataset, webId)
+        const podsUrls = getUrlAll(
+            profileThing,
+            STORAGE_PREDICATE
+        );
+        const pod = podsUrls[0]
+        const profileUri = `${pod}Solid-Health/profile.ttl`
 
+        const profile = await getSolidDataset(profileUri, { fetch: session.fetch })
 
+        let thing = getThing(profile, profileUri + '#profileData')
+
+        let patientGivenName = getStringNoLocale(thing, PROFILE.GIVEN_NAME)
+        let patientFamilyName = getStringNoLocale(thing, PROFILE.FAMILY_NAME)
+        let patientBirthDate = getStringNoLocale(thing, PROFILE.BIRTH_DATE)
+        let gp = getStringNoLocale(thing, PROFILE.DOCTORS_ID)
+
+        if (gp == session.info.webId) {
+            const containerUrl = await getContainerUri(session)
+
+            let index = await getSolidDataset(containerUrl + 'index.ttl', { fetch: session.fetch })
+            let patientName = patientGivenName + ' ' + patientFamilyName
+
+            let patient = buildThing(createThing({ name: patientName }))
+                .addStringNoLocale(PATIENT.BIRTH_DATE, patientBirthDate)
+                .addStringNoLocale(PATIENT.FAMILY_NAME, patientFamilyName)
+                .addStringNoLocale(PATIENT.GIVEN_NAME, patientGivenName)
+                .addStringNoLocale(PATIENT.WEB_ID, webId)
+                .build()
+
+            index = setThing(index, patient)
+            await saveSolidDatasetAt(containerUrl + 'index.ttl', index, { fetch: session.fetch })
+
+            return true
+        }
+        else {
+            return false
+        }
+
+        return true
+    } catch (e) {
+        return false
+    }
 }
 
 export async function testAccess(session) {
-    const containerUri = await getContainerUri(session)
-    const profileUri = containerUri + 'profile.ttl'
 
-    let dataset = await getProfileData(containerUri, session)
-    s
+    const dataset = await getSolidDataset('https://storage.inrupt.com/8dee44e6-2bf3-4965-a783-998d96a9bd49/Solid-Health/profile.ttl', { fetch: session.fetch })
+
+    const thing = getThing(dataset, 'https://storage.inrupt.com/8dee44e6-2bf3-4965-a783-998d96a9bd49/Solid-Health/profile.ttl#profileData')
+
+    const name = getStringNoLocale(thing, PROFILE.GIVEN_NAME)
+
+    console.log(name)
+
 }
 
 export async function addGP(webId, session) {

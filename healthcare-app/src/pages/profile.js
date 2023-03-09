@@ -176,7 +176,7 @@ export default function ProfilePage() {
         doctorCard = (
             <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
                 <CardContent>
-                    <Typography>You have not add your GP to your account yet.</Typography>
+                    <Typography>You have not added your GP to your account yet.</Typography>
                 </CardContent>
                 <CardActions>
                     <TextField value={newDoctorId} label="GP's WebId" onChange={handleNewGPAddress}></TextField>
