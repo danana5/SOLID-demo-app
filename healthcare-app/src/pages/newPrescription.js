@@ -44,7 +44,7 @@ export default function NewPrescription() {
         <div>
             <HomeToolbar></HomeToolbar>
             <Container>
-                <Card sx={{ mt: 5, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
+                <Card sx={{ mt: 5 }} variant="outlined">
                     <CardHeader title="Create New Prescription"></CardHeader>
                     <CardContent>
                         <FormControl fullWidth>

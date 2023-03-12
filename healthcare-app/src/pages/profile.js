@@ -174,7 +174,7 @@ export default function ProfilePage() {
 
     if (!profile.doctorsId || profile.doctorsId == undefined) {
         doctorCard = (
-            <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
+            <Card sx={{ mt: 2, minWidth: 700 }} variant="outlined">
                 <CardContent>
                     <Typography>You have not added your GP to your account yet.</Typography>
                 </CardContent>
@@ -185,7 +185,7 @@ export default function ProfilePage() {
             </Card>)
     } else {
         doctorCard = (
-            <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
+            <Card sx={{ mt: 2, minWidth: 700 }} variant="outlined">
                 <Typography>The WebId of your GP is: {profile.doctorsId}</Typography>
             </Card>
         )
@@ -195,8 +195,8 @@ export default function ProfilePage() {
         <div>
             <HomeToolbar></HomeToolbar>
             <Container>
-                <Typography sx={{ mt: 5, mr: 50, ml: 50 }} variant="h5" color="black">Your Profile</Typography>
-                <Card sx={{ mt: 2, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">{profilePage}</Card>
+                <Typography sx={{ mt: 5, }} variant="h5" color="black">Your Profile</Typography>
+                <Card sx={{ mt: 2, minWidth: 700 }} variant="outlined">{profilePage}</Card>
                 {adminLogIn}
                 {doctorCard}
             </Container>

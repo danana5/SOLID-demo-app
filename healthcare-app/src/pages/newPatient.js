@@ -26,7 +26,7 @@ export default function NewPatient() {
         <div>
             <HomeToolbar></HomeToolbar>
             <Container>
-                <Card sx={{ mt: 5, maxWidth: 700, mr: 50, ml: 50 }} variant="outlined">
+                <Card sx={{ mt: 5 }} variant="outlined">
                     <CardHeader title="Add New Patient"></CardHeader>
                     <CardContent>
                         <Typography color="text.secondary" variant="subtitle2" sx={{ mb: 2 }}><strong>ATTENTION:</strong> In order to add a patient they must have already added you as their GP.</Typography>

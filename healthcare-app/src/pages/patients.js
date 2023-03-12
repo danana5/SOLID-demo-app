@@ -47,7 +47,7 @@ export default function Patients() {
         <div>
             <HomeToolbar></HomeToolbar>
             <Container>
-                <Card sx={{ mt: 5, maxWidth: 700, ml: 30, mr: 30 }} variant="outlined">
+                <Card sx={{ mt: 5 }} variant="outlined">
                     <CardHeader title="Your Patients"></CardHeader>
                     <CardContent>
                         <List>

@@ -61,7 +61,7 @@ export default function Appointments() {
         <div>
             <HomeToolbar></HomeToolbar>
             <Container>
-                <Card sx={{ mt: 5, maxWidth: 700, ml: 30, mr: 30 }} variant="outlined">
+                <Card sx={{ mt: 5 }} variant="outlined">
                     <CardHeader title="Your Appointments"></CardHeader>
                     <CardContent>
                         <List>
@@ -83,7 +83,7 @@ export default function Appointments() {
                     </CardContent>
                 </Card>
                 {isDoctor == true &&
-                    <Card sx={{ mt: 5, maxWidth: 700, ml: 30, mr: 30 }} variant="outlined">
+                    <Card sx={{ mt: 5 }} variant="outlined">
                         <CardHeader title="GP: Create Appointment"></CardHeader>
                         <CardContent>
                             <FormControl fullWidth>

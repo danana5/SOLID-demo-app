@@ -28,7 +28,7 @@ export default function Prescriptions() {
         <div>
             <HomeToolbar></HomeToolbar>
             <Container>
-                <Card sx={{ mt: 5, maxWidth: 700, ml: 30, mr: 30 }} variant="outlined">
+                <Card sx={{ mt: 5 }} variant="outlined">
                     <CardHeader title="Your Prescriptions"></CardHeader>
                     <CardContent>
                         <List>
@@ -48,7 +48,7 @@ export default function Prescriptions() {
                     </CardContent>
                 </Card>
                 {isDoctor == true &&
-                    <Card sx={{ mt: 5, maxWidth: 700, ml: 30, mr: 30 }} variant="outlined">
+                    <Card sx={{ mt: 5 }} variant="outlined">
                         <CardHeader title="GP: Create Prescription"></CardHeader>
                         <CardContent>
                             <Link href="/newPrescription"><Button color="secondary">Create Prescription For Patient</Button></Link>
