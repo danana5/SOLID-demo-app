@@ -88,7 +88,10 @@ export default function HomeToolbar({ }) {
                             textDecoration: 'none',
                         }}
                     >
-                        <Link href="/home">Solid Health</Link>
+                        {color == "secondary" &&
+                            <Link href="/home">Solid Health GP</Link>}
+                        {color == "primary" &&
+                            <Link href="/home">Solid Health Patient</Link>}
                     </Typography>
                     {color == "secondary" &&
                         <Button

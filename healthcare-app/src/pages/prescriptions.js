@@ -49,7 +49,7 @@ export default function Prescriptions() {
                 </Card>
                 {isDoctor == true &&
                     <Card sx={{ mt: 5, maxWidth: 700, ml: 30, mr: 30 }} variant="outlined">
-                        <CardHeader title="GP Panel"></CardHeader>
+                        <CardHeader title="GP: Create Prescription"></CardHeader>
                         <CardContent>
                             <Link href="/newPrescription"><Button color="secondary">Create Prescription For Patient</Button></Link>
                         </CardContent>
